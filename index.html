@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Storico RP</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+<div class="container">
+    <div class="header" style="margin-bottom: 20px;">
+        <h2 style="color:var(--p); margin:0;">I miei Registri</h2>
+        <p style="font-size:0.85rem; color:#64748b;">Archivio locale protetto</p>
+    </div>
+
+    <div id="list-container">
+        <div style="text-align:center; padding:20px; color:#64748b;">Caricamento database...</div>
+    </div>
+
+    <hr style="border:0; border-top:1px solid #e2e8f0; margin:30px 0 20px;">
+
+    <div class="management-section" style="padding-bottom: 40px;">
+        <span class="title" style="font-size:0.9rem;">Gestione Backup</span>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="btn btn-alt" onclick="handleExport()" style="flex:1; margin-top:0; font-size:0.8rem; padding:10px;">📤 Esporta</button>
+            <button class="btn btn-alt" onclick="document.getElementById('importFile').click()" style="flex:1; margin-top:0; font-size:0.8rem; padding:10px;">📥 Importa</button>
+            <input type="file" id="importFile" style="display:none;" accept=".json" onchange="handleImport(this)">
+        </div>
+    </div>
+</div>
+
+<div class="nav">
+    <a href="index.html" class="nav-btn active">
+        <span>Storico</span>
+    </a>
+    <a href="editor.html" class="nav-btn">
+        <span>Nuovo RP</span>
+    </a>
+</div>
+
+<script src="app.js"></script>
+<script>
+    // Funzione per caricare la lista dallo storico
+    async function loadList() {
+        const cont = document.getElementById('list-container');
+        
+        getEntries((data) => {
+            if (!data || data.length === 0) {
+                cont.innerHTML = `
+                    <div style="text-align:center; padding:40px 20px; background:white; border-radius:12px; border:2px dashed #cbd5e1;">
+                        <p style="color:#64748b; margin-bottom:15px;">Non ci sono ancora registri salvati.</p>
+                        <a href="editor.html" class="btn" style="text-decoration:none; display:inline-block; width:auto; padding:10px 20px;">Inizia ora</a>
+                    </div>`;
+                return;
+            }
+            
+            cont.innerHTML = data.map(i => `
+                <a href="editor.html?id=${i.id}" class="history-item">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <span style="font-size:0.75rem; color:var(--p); font-weight:bold; background:#eff6ff; padding:2px 8px; border-radius:4px;">
+                            ${i.date ? i.date.replace('T', ' ') : 'Senza data'}
+                        </span>
+                    </div>
+                    <div style="margin-top:8px; font-size:0.95rem; line-height:1.4;">
+                        <strong>S:</strong> ${i.sit_1 ? (i.sit_1.length > 60 ? i.sit_1.substring(0, 60) + '...' : i.sit_1) : '<i>Nessuna descrizione</i>'}
+                    </div>
+                    <div style="margin-top:5px; font-size:0.85rem; color:#64748b;">
+                        Pensiero: ${i.p_2 || 0}% | Emozione: ${i.e_2 || 0}
+                    </div>
+                </a>
+            `).join('');
+        });
+    }
+
+    // Funzione Esporta
+    async function handleExport() {
+        getEntries((data) => {
+            if (data.length === 0) {
+                alert("Nessun dato da esportare.");
+                return;
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `backup_rp_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+    }
+
+    // Funzione Importa
+    function handleImport(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                if (!Array.isArray(importedData)) throw new Error("Formato non valido");
+
+                if (confirm(`Vuoi importare ${importedData.length} registri? I dati esistenti con lo stesso ID verranno aggiornati.`)) {
+                    for (const entry of importedData) {
+                        // Usiamo una versione semplificata di save senza redirect
+                        const db = await getDB();
+                        const tx = db.transaction(['rp_entries'], 'readwrite');
+                        tx.objectStore('rp_entries').put(entry);
+                    }
+                    alert("Importazione completata!");
+                    loadList();
+                }
+            } catch (err) {
+                alert("Errore durante l'importazione: " + err.message);
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    // Avvia il caricamento al termine del caricamento della pagina
+    window.addEventListener('DOMContentLoaded', loadList);
+</script>
+
+</body>
+</html>
