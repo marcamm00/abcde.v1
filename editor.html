@@ -5,6 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Editor RP</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        textarea {
+            resize: none;
+            overflow: hidden;
+            min-height: 80px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .dist-item {
+            display: block; width: 100%; text-align: left; padding: 10px;
+            margin-bottom: 5px; background: #f8fafc; border: 1px solid #e2e8f0;
+            border-radius: 6px; cursor: pointer; font-size: 0.9rem;
+        }
+    </style>
 </head>
 <body>
 
@@ -21,81 +37,91 @@
 
     <div class="card">
         <span class="title">1. Situazione</span>
-        
-        <label>Quale evento reale, o flusso di pensieri, o sogno ad occhi aperti, o ricordo ha portato all’emozione spiacevole?</label>
-        <textarea id="f-sit_1" rows="3"></textarea>
-        
-        <label>Quali (se ce ne sono) sensazioni fisiche dolorose hai avuto?</label>
-        <textarea id="f-sit_2" rows="2"></textarea>
+        <label>1 Quale evento reale, o flusso di pensieri, o sogno ad occhi aperti, o ricordo ha portato all’emozione spiacevole?</label>
+        <textarea id="f-sit_1" oninput="autoResize(this)"></textarea>
+        <label>2 Quali (se ce ne sono) sensazioni fisiche dolorose hai avuto?</label>
+        <textarea id="f-sit_2" oninput="autoResize(this)"></textarea>
     </div>
 
     <div class="card">
         <span class="title">2. Pensiero/i Automatico/i</span>
-        
-        <label>Quale/i pensiero/i e/o immagine/i ti è/sono passato/i per la mente?</label>
-        <textarea id="f-p_1" rows="3"></textarea>
-        
+        <label>1 Quale/i pensiero/i e/o immagine/i ti è/sono passato/i per la mente?</label>
+        <textarea id="f-p_1" oninput="autoResize(this)"></textarea>
         <div class="range-box">
-            <label>In che misura ci hai creduto sul momento? <span id="v-p_2">50</span>%</label>
-            <input type="range" id="f-p_2" min="0" max="100" value="50" oninput="document.getElementById('v-p_2').innerText=this.value">
+            <label>2 In che misura ci hai creduto sul momento? <span id="v-p_2">50</span>%</label>
+            <input type="range" id="f-p_2" min="0" max="100" step="5" value="50" oninput="updateVal(this, 'v-p_2')">
         </div>
     </div>
 
     <div class="card">
         <span class="title">3. Emozione/i</span>
-        
-        <label>Quale emozione/i (tristezza, ansia, rabbia, ecc.) hai provato sul momento?</label>
-        <input type="text" id="f-e_1">
-        
+        <label>1 Quale emozione/i (tristezza, ansia, rabbia, ecc.) hai provato sul momento?</label>
+        <textarea id="f-e_1" oninput="autoResize(this)" placeholder="Es. Ansia, Tristezza..."></textarea>
         <div class="range-box">
-            <label>Quanto è stata intensa l’emozione (0-100)? <span id="v-e_2">50</span></label>
-            <input type="range" id="f-e_2" min="0" max="100" value="50" oninput="document.getElementById('v-e_2').innerText=this.value">
+            <label>2 Quanto è stata intensa l’emozione (0-100)? <span id="v-e_2">50</span></label>
+            <input type="range" id="f-e_2" min="0" max="100" step="5" value="50" oninput="updateVal(this, 'v-e_2')">
         </div>
     </div>
 
     <div class="card">
-        <span class="title">4. Risposta Adattiva</span>
-        
+        <span class="title">4. Risposta adattiva</span>
         <label>1 (opzionale) Quale distorsione cognitiva hai fatto?</label>
-        <input type="text" id="f-dist_cog" placeholder="Es. Catastrofizzazione, Pensiero tutto-o-nulla...">
-
-        <div style="margin-top:15px; border-top:1px dashed #cbd5e1; padding-top:10px;">
-            <button onclick="openModal()" style="background:#eff6ff; border:1px solid var(--p); color:var(--p); padding:8px 12px; border-radius:6px; font-weight:bold; font-size:0.9rem; width:100%; margin-bottom:10px;">💡 Apri Domande Guida</button>
-            
-            <label>2 Usa le domande guida per comporre una risposta al/i pensiero/i automatico/i.</label>
-            <textarea id="f-r_1" rows="5"></textarea>
+        <div style="display:flex; gap:5px; margin-bottom:10px;">
+            <textarea id="f-dist_cog" style="flex:1;" oninput="autoResize(this)" placeholder="Seleziona o scrivi..."></textarea> 
+            <button onclick="openDistModal()" style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:8px; padding:0 10px;">📋</button>
         </div>
+
+        <button onclick="openModal()" style="background:#eff6ff; border:1px solid var(--p); color:var(--p); padding:8px; border-radius:6px; font-weight:bold; width:100%; margin-bottom:10px;">💡 Domande per la risposta alternativa</button>
+        
+        <label>2 Usa le domande guida in basso per comporre una risposta al/i pensiero/i automatico/i.</label>
+        <textarea id="f-r_1" oninput="autoResize(this)"></textarea>
 
         <div class="range-box">
             <label>3 Quanto credi a ogni risposta? <span id="v-r_2">50</span>%</label>
-            <input type="range" id="f-r_2" min="0" max="100" value="50" oninput="document.getElementById('v-r_2').innerText=this.value">
+            <input type="range" id="f-r_2" min="0" max="100" step="5" value="50" oninput="updateVal(this, 'v-r_2')">
         </div>
     </div>
 
     <div class="card">
         <span class="title">5. Esito</span>
-        
         <div class="range-box">
             <label>1 Quanto credi adesso a ciascun pensiero automatico? <span id="v-es_1">50</span>%</label>
-            <input type="range" id="f-es_1" min="0" max="100" value="50" oninput="document.getElementById('v-es_1').innerText=this.value">
+            <input type="range" id="f-es_1" min="0" max="100" step="5" value="50" oninput="updateVal(this, 'v-es_1')">
         </div>
-        
         <label>2 Quale/i emozione/i senti adesso? Quanto è intensa l’emozione (0-100%)?</label>
-        <textarea id="f-es_2" rows="2" placeholder="Es. Calma 80%, Ansia 20%"></textarea>
-        
+        <textarea id="f-es_2" oninput="autoResize(this)"></textarea>
         <label>3 Che cosa farai (o hai fatto)?</label>
-        <textarea id="f-es_3" rows="2"></textarea>
+        <textarea id="f-es_3" oninput="autoResize(this)"></textarea>
     </div>
 
     <button class="btn" onclick="handleSave()">💾 SALVA NEL DIARIO</button>
     <div id="del-area"></div>
 </div>
 
+<div id="distModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeDistModal()">&times;</span>
+        <h4 style="color:var(--p); margin-top:0;">Lista Distorsioni</h4>
+        <div style="max-height: 350px; overflow-y: auto;">
+            <button class="dist-item" onclick="addDist('Pensiero Tutto o Nulla')"><strong>Pensiero Tutto o Nulla</strong></button>
+            <button class="dist-item" onclick="addDist('Iper-generalizzazione')"><strong>Iper-generalizzazione</strong></button>
+            <button class="dist-item" onclick="addDist('Filtro Mentale')"><strong>Filtro Mentale</strong></button>
+            <button class="dist-item" onclick="addDist('Squalificare il positivo')"><strong>Squalificare il positivo</strong></button>
+            <button class="dist-item" onclick="addDist('Lettura del pensiero / Chiaroveggenza')"><strong>Lettura del pensiero / Chiaroveggenza</strong></button>
+            <button class="dist-item" onclick="addDist('Catastrofizzazione')"><strong>Catastrofizzazione</strong></button>
+            <button class="dist-item" onclick="addDist('Ragionamento Emozionale')"><strong>Ragionamento Emozionale</strong></button>
+            <button class="dist-item" onclick="addDist('Doverizzazioni')"><strong>Doverizzazioni</strong></button>
+            <button class="dist-item" onclick="addDist('Etichettamento')"><strong>Etichettamento</strong></button>
+            <button class="dist-item" onclick="addDist('Personalizzazione')"><strong>Personalizzazione</strong></button>
+        </div>
+    </div>
+</div>
+
 <div id="guideModal" class="modal">
     <div class="modal-content">
-        <span class="close" onclick="closeModal()" style="font-size:2rem;">&times;</span>
-        <h4 style="color:var(--p); margin-top:0; border-bottom:2px solid #f1f5f9; padding-bottom:10px;">Domande per aiutare a comporre una risposta alternativa:</h4>
-        <div class="guide-list" style="max-height: 400px; overflow-y: auto;">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h4 style="color:var(--p); margin-top:0;">Domande per comporre una risposta:</h4>
+        <div class="guide-list" style="max-height: 350px; overflow-y: auto; font-size: 0.9rem;">
             <ul>
                 <li>Qual è la prova che il pensiero automatico è vero?</li>
                 <li>Che non è vero?</li>
@@ -109,7 +135,6 @@
                 <li>Se un amico/a fosse nella stessa situazione e avesse questo pensiero cosa gli/le direi?</li>
             </ul>
         </div>
-        <button onclick="closeModal()" class="btn" style="margin-top:10px; padding:10px;">Chiudi</button>
     </div>
 </div>
 
@@ -120,21 +145,30 @@
 
     function openModal() { document.getElementById('guideModal').style.display = "block"; }
     function closeModal() { document.getElementById('guideModal').style.display = "none"; }
+    function openDistModal() { document.getElementById('distModal').style.display = "block"; }
+    function closeDistModal() { document.getElementById('distModal').style.display = "none"; }
 
-    // Chiudi modale se si clicca fuori
-    window.onclick = function(event) {
-        if (event.target == document.getElementById('guideModal')) {
-            closeModal();
-        }
+    function addDist(name) {
+        const input = document.getElementById('f-dist_cog');
+        input.value = input.value ? input.value + ", " + name : name;
+        autoResize(input); // Adatta l'altezza dopo l'inserimento
+        closeDistModal();
     }
 
-    // Caricamento dati
+    function autoResize(el) {
+        el.style.height = 'auto';
+        el.style.height = (el.scrollHeight) + 'px';
+    }
+
+    function updateVal(el, targetId) {
+        document.getElementById(targetId).innerText = el.value;
+    }
+
     window.addEventListener('load', () => {
         if(entryId) {
             getEntryById(entryId, (d) => {
                 if(!d) return;
                 document.getElementById('page-title').innerText = "Modifica Registro";
-                // Popolamento campi
                 document.getElementById('f-date').value = d.date;
                 document.getElementById('f-sit_1').value = d.sit_1 || '';
                 document.getElementById('f-sit_2').value = d.sit_2 || '';
@@ -144,24 +178,23 @@
                 document.getElementById('f-e_1').value = d.e_1 || '';
                 document.getElementById('f-e_2').value = d.e_2 || 50;
                 document.getElementById('v-e_2').innerText = d.e_2 || 50;
-                
-                // Nuovi campi adattivi
                 document.getElementById('f-dist_cog').value = d.dist_cog || ''; 
                 document.getElementById('f-r_1').value = d.r_1 || '';
                 document.getElementById('f-r_2').value = d.r_2 || 50;
                 document.getElementById('v-r_2').innerText = d.r_2 || 50;
-                
-                // Esito
                 document.getElementById('f-es_1').value = d.es_1 || 50;
                 document.getElementById('v-es_1').innerText = d.es_1 || 50;
                 document.getElementById('f-es_2').value = d.es_2 || '';
                 document.getElementById('f-es_3').value = d.es_3 || '';
                 
-                // Tasto Elimina
+                // Forza l'altezza corretta all'apertura per i dati caricati
+                setTimeout(() => {
+                    document.querySelectorAll('textarea').forEach(autoResize);
+                }, 100);
+
                 document.getElementById('del-area').innerHTML = `<button class="btn" style="background:#ef4444; margin-top:20px;" onclick="deleteEntry(${entryId})">Elimina Registro</button>`;
             });
         } else {
-            // Data attuale di default
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             document.getElementById('f-date').value = now.toISOString().slice(0,16);
@@ -178,7 +211,6 @@
             p_2: document.getElementById('f-p_2').value,
             e_1: document.getElementById('f-e_1').value,
             e_2: document.getElementById('f-e_2').value,
-            // Aggiunto campo distorsione cognitiva
             dist_cog: document.getElementById('f-dist_cog').value,
             r_1: document.getElementById('f-r_1').value,
             r_2: document.getElementById('f-r_2').value,
@@ -186,13 +218,6 @@
             es_2: document.getElementById('f-es_2').value,
             es_3: document.getElementById('f-es_3').value
         };
-
-        // Validazione minima
-        if(!entry.sit_1 && !entry.p_1) {
-            alert("Inserisci almeno la situazione o il pensiero automatico.");
-            return;
-        }
-
         await saveEntry(entry);
     }
 </script>
